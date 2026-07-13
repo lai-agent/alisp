@@ -380,4 +380,126 @@ impl Evaluator {
         let p = fs::canonicalize(&path).map_err(|e| format!("realpath '{}': {}", path, e))?;
         Ok(Expr::Str(p.to_string_lossy().to_string()))
     }
+
+    // ---- Line-range operations ----
+
+    /// Read lines from start to end (1-indexed, inclusive). Returns list of line strings.
+    pub(crate) fn builtin_read_range(&mut self, args: &[Expr]) -> Result<Expr, String> {
+        if args.len() < 3 {
+            return Err("(read-range path start end)".into());
+        }
+        let path = expr_to_string(&args[0]);
+        let start = match &args[1] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("read-range: start must be a number".into()),
+        };
+        let end = match &args[2] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("read-range: end must be a number".into()),
+        };
+        let content = fs::read_to_string(&path).map_err(|e| format!("read-range '{}': {}", path, e))?;
+        let lines: Vec<&str> = content.lines().collect();
+        let start_idx = if start == 0 { 0 } else { start - 1 };
+        let end_idx = end.min(lines.len());
+        if start_idx >= lines.len() || start_idx >= end_idx {
+            return Ok(Expr::List(Vec::new()));
+        }
+        let result: Vec<Expr> = lines[start_idx..end_idx]
+            .iter()
+            .map(|l| Expr::Str(l.to_string()))
+            .collect();
+        Ok(Expr::List(result))
+    }
+
+    /// Replace lines start..end (1-indexed, inclusive) with content.
+    /// content can be a string (with newlines) or a list of strings.
+    pub(crate) fn builtin_write_range(&mut self, args: &[Expr]) -> Result<Expr, String> {
+        if args.len() < 3 {
+            return Err("(write-range path start end content)".into());
+        }
+        let path = expr_to_string(&args[0]);
+        let start = match &args[1] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("write-range: start must be a number".into()),
+        };
+        let end = match &args[2] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("write-range: end must be a number".into()),
+        };
+        let new_lines = if args.len() > 3 {
+            match &args[3] {
+                Expr::Str(s) => s.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+                Expr::List(v) => v.iter().map(expr_to_string).collect(),
+                _ => vec![expr_to_string(&args[3])],
+            }
+        } else {
+            Vec::new()
+        };
+        let content = fs::read_to_string(&path).map_err(|e| format!("write-range '{}': {}", path, e))?;
+        let mut lines: Vec<String> = content.lines().map(|l| l.to_string()).collect();
+        let start_idx = if start == 0 { 0 } else { start - 1 };
+        let end_idx = end.min(lines.len());
+        if start_idx > lines.len() {
+            lines.extend(new_lines);
+        } else {
+            lines.splice(start_idx..end_idx, new_lines);
+        }
+        let result = lines.join("\n");
+        fs::write(&path, &result).map_err(|e| format!("write-range '{}': {}", path, e))?;
+        Ok(Expr::Bool(true))
+    }
+
+    /// Insert content before the given line number (1-indexed).
+    /// content can be a string (with newlines) or a list of strings.
+    pub(crate) fn builtin_insert_at(&mut self, args: &[Expr]) -> Result<Expr, String> {
+        if args.len() < 3 {
+            return Err("(insert-at path line content)".into());
+        }
+        let path = expr_to_string(&args[0]);
+        let line = match &args[1] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("insert-at: line must be a number".into()),
+        };
+        let new_lines = match &args[2] {
+            Expr::Str(s) => s.lines().map(|l| l.to_string()).collect::<Vec<_>>(),
+            Expr::List(v) => v.iter().map(expr_to_string).collect(),
+            _ => vec![expr_to_string(&args[2])],
+        };
+        let content = fs::read_to_string(&path).map_err(|e| format!("insert-at '{}': {}", path, e))?;
+        let mut lines: Vec<String> = content.lines().map(|l| l.to_string()).collect();
+        let idx = if line == 0 { 0 } else { line - 1 };
+        let idx = idx.min(lines.len());
+        for (i, new_line) in new_lines.into_iter().enumerate() {
+            lines.insert(idx + i, new_line);
+        }
+        let result = lines.join("\n");
+        fs::write(&path, &result).map_err(|e| format!("insert-at '{}': {}", path, e))?;
+        Ok(Expr::Bool(true))
+    }
+
+    /// Remove lines from start to end (1-indexed, inclusive).
+    pub(crate) fn builtin_remove_range(&mut self, args: &[Expr]) -> Result<Expr, String> {
+        if args.len() < 3 {
+            return Err("(remove-range path start end)".into());
+        }
+        let path = expr_to_string(&args[0]);
+        let start = match &args[1] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("remove-range: start must be a number".into()),
+        };
+        let end = match &args[2] {
+            Expr::Num(n) => *n as usize,
+            _ => return Err("remove-range: end must be a number".into()),
+        };
+        let content = fs::read_to_string(&path).map_err(|e| format!("remove-range '{}': {}", path, e))?;
+        let mut lines: Vec<String> = content.lines().map(|l| l.to_string()).collect();
+        let start_idx = if start == 0 { 0 } else { start - 1 };
+        let end_idx = end.min(lines.len());
+        if start_idx < end_idx && start_idx < lines.len() {
+            lines.drain(start_idx..end_idx);
+        }
+        let result = lines.join("\n");
+        fs::write(&path, &result).map_err(|e| format!("remove-range '{}': {}", path, e))?;
+        Ok(Expr::Bool(true))
+    }
 }

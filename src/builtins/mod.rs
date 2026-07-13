@@ -20,8 +20,12 @@ impl Evaluator {
             // File I/O
             "read" | "read-file" => self.builtin_read(args),
             "read-lines" => self.builtin_read_lines(args),
+            "read-range" => self.builtin_read_range(args),
             "write" | "write-file" => self.builtin_write(args),
+            "write-range" => self.builtin_write_range(args),
             "append" | "append-file" => self.builtin_append(args),
+            "insert-at" => self.builtin_insert_at(args),
+            "remove-range" => self.builtin_remove_range(args),
             "exists" | "file-exists" => self.builtin_exists(args),
             "file?" => self.builtin_is_file(args),
             "dir?" => self.builtin_is_dir(args),

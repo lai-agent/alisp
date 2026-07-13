@@ -68,18 +68,35 @@ These do NOT evaluate all arguments before execution.
 
 ```
 (read "path")                ; read file to string
+(read-lines "path")          ; read file to list of lines
+(read-range "path" start end) ; read lines start..end (1-indexed, inclusive)
 (write "path" "content")     ; write/overwrite file
+(write-range "path" start end content) ; replace lines start..end with content
 (append "path" "content")    ; append to file
+(insert-at "path" line content) ; insert content before line N
+(remove-range "path" start end) ; delete lines start..end
 (exists "path")              ; bool
-(rm "path")                  ; delete file or dir
+(file? "path")               ; true if regular file
+(dir? "path")                ; true if directory
+(file-size "path")           ; bytes as number
+(mtime "path")               ; modification time as unix timestamp
+(touch "path")               ; create or update timestamp
+(rm "path")                  ; delete file or dir (alias: delete)
 (mkdir "path")               ; recursive mkdir
-(cp "src" "dst")             ; copy file
-(mv "src" "dst")             ; move/rename
-(ls "path")                  ; list dir, returns sorted list of names
-(glob "pattern")             ; glob with *, returns list of paths
-(cwd)                        ; current dir as string
+(cp "src" "dst")             ; copy file or directory recursively (alias: copy)
+(mv "src" "dst")             ; move/rename (alias: move)
+(ls "path")                  ; list dir, returns sorted list of names (alias: list-dir)
+(glob "pattern")             ; glob with * and **, returns list of paths
+(cwd)                        ; current dir as string (alias: pwd)
 (cd "path")                  ; change dir
+(basename "path")            ; file name without directory
+(dirname "path")             ; directory without file name
+(ext "path")                 ; file extension without dot
+(join-path a b...)           ; join path segments
+(realpath "path")            ; resolve to canonical absolute path
 ```
+
+Content for `write-range` and `insert-at` can be a string (split on newlines) or a list of strings.
 
 ### Environment
 

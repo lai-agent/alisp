@@ -16,7 +16,9 @@ impl Evaluator {
         let mut globals = HashMap::new();
         let builtins: &[&str] = &[
             "exec", "shell", "sh", "exec-result",
-            "read", "read-file", "read-lines", "write", "write-file", "append", "append-file",
+            "read", "read-file", "read-lines", "read-range",
+            "write", "write-file", "write-range", "append", "append-file",
+            "insert-at", "remove-range",
             "exists", "file-exists", "file?", "dir?", "file-size", "mtime",
             "touch", "rm", "delete", "mkdir", "cp", "copy", "mv", "move",
             "ls", "list-dir", "glob", "cwd", "pwd", "cd",

@@ -732,6 +732,52 @@ Resolve a path to its absolute canonical form (resolves `..`, `.`, and symlinks)
 (realpath "../src/../src")  ; => "/home/user/project/src"
 ```
 
+#### `read-range`
+
+Read lines from a file by line range (1-indexed, inclusive). Returns a list of line strings.
+
+```lisp
+(write "data.txt" "a\nb\nc\nd\ne")
+(read-range "data.txt" 2 4)   ; => ("b" "c" "d")
+(read-range "data.txt" 1 1)   ; => ("a")
+```
+
+#### `write-range`
+
+Replace a range of lines (1-indexed, inclusive) with new content. Content can be a string (with newlines) or a list of strings.
+
+```lisp
+(write "data.txt" "a\nb\nc\nd\ne")
+(write-range "data.txt" 2 3 "X\nY")   ; lines 2-3 replaced
+(read "data.txt")                       ; => "a\nX\nY\nd\ne"
+
+; Replace with a list
+(write-range "data.txt" 1 3 (list "one" "two" "three"))
+```
+
+#### `insert-at`
+
+Insert content before a given line number (1-indexed). Content can be a string (with newlines) or a list of strings.
+
+```lisp
+(write "data.txt" "a\nb\nc")
+(insert-at "data.txt" 2 "NEW")   ; insert before line 2
+(read "data.txt")                 ; => "a\nNEW\nb\nc"
+
+; Insert multiple lines
+(insert-at "data.txt" 1 (list "first" "second"))
+```
+
+#### `remove-range`
+
+Remove a range of lines (1-indexed, inclusive).
+
+```lisp
+(write "data.txt" "a\nb\nc\nd\ne")
+(remove-range "data.txt" 2 4)   ; remove lines 2-4
+(read "data.txt")                ; => "a\ne"
+```
+
 ---
 
 ### Environment Variables
