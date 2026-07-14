@@ -7,6 +7,7 @@ mod arithmetic;
 mod io;
 mod http;
 mod misc;
+mod sql;
 
 use crate::Evaluator;
 use crate::expr::Expr;
@@ -155,6 +156,13 @@ impl Evaluator {
             "re-replace-all" => self.builtin_re_replace_all(args),
             "re-split" => self.builtin_re_split(args),
             "re-scan" => self.builtin_re_scan(args),
+            // SQL
+            "sql-open" => self.builtin_sql_open(args),
+            "sql-execute" => self.builtin_sql_execute(args),
+            "sql-query" => self.builtin_sql_query(args),
+            "sql-tables" => self.builtin_sql_tables(args),
+            "sql-schema" => self.builtin_sql_schema(args),
+            "sql-close" => self.builtin_sql_close(args),
             _ => Err(format!("Unknown function: {}", name)),
         }
     }

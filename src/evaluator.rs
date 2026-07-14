@@ -9,6 +9,7 @@ pub struct Evaluator {
     pub(crate) globals: HashMap<String, Expr>,
     pub(crate) locals: Vec<HashMap<String, Expr>>,
     pub(crate) start_time: std::time::Instant,
+    pub(crate) sql_connections: HashMap<String, rusqlite::Connection>,
 }
 
 impl Evaluator {
@@ -45,6 +46,8 @@ impl Evaluator {
             "re-find", "re-find-all",
             "re-replace", "re-replace-all",
             "re-split", "re-scan",
+            // SQL
+            "sql-open", "sql-execute", "sql-query", "sql-tables", "sql-schema", "sql-close",
         ];
         for &name in builtins {
             globals.insert(name.to_string(), Expr::Builtin(name));
@@ -53,6 +56,7 @@ impl Evaluator {
             globals,
             locals: Vec::new(),
             start_time: std::time::Instant::now(),
+            sql_connections: HashMap::new(),
         }
     }
 
