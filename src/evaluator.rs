@@ -48,6 +48,9 @@ impl Evaluator {
             "re-split", "re-scan",
             // SQL
             "sql-open", "sql-execute", "sql-query", "sql-tables", "sql-schema", "sql-close",
+            // HTML
+            "html-select", "html-text", "html-attr", "html-links", "html-title",
+            "html-meta", "html-meta-all", "html-tables", "html-images", "html-forms",
         ];
         for &name in builtins {
             globals.insert(name.to_string(), Expr::Builtin(name));

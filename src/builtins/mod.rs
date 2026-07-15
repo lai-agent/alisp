@@ -8,6 +8,7 @@ mod io;
 mod http;
 mod misc;
 mod sql;
+mod html;
 
 use crate::Evaluator;
 use crate::expr::Expr;
@@ -163,6 +164,17 @@ impl Evaluator {
             "sql-tables" => self.builtin_sql_tables(args),
             "sql-schema" => self.builtin_sql_schema(args),
             "sql-close" => self.builtin_sql_close(args),
+            // HTML
+            "html-select" => self.builtin_html_select(args),
+            "html-text" => self.builtin_html_text(args),
+            "html-attr" => self.builtin_html_attr(args),
+            "html-links" => self.builtin_html_links(args),
+            "html-title" => self.builtin_html_title(args),
+            "html-meta" => self.builtin_html_meta(args),
+            "html-meta-all" => self.builtin_html_meta_all(args),
+            "html-tables" => self.builtin_html_tables(args),
+            "html-images" => self.builtin_html_images(args),
+            "html-forms" => self.builtin_html_forms(args),
             _ => Err(format!("Unknown function: {}", name)),
         }
     }
