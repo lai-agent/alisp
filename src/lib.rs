@@ -1,7 +1,7 @@
 //! alisp - A tiny Lisp interpreter for AI agents.
 //!
-//! Zero-dependency Rust crate providing shell execution, file I/O, HTTP,
-//! JSON handling, string/list operations, and error handling.
+//! Rust crate providing shell execution, file I/O, HTTP,
+//! JSON handling, SQL, HTML parsing, string/list operations, and error handling.
 //!
 //! # Quick Start
 //!

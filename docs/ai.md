@@ -1,6 +1,7 @@
 # alisp Language Reference
 
 S-expression Lisp dialect. All code is a sequence of expressions evaluated in order.
+Uses `rusqlite` (bundled) for SQL and `scraper` for HTML parsing.
 
 ## Types
 
@@ -289,6 +290,23 @@ Uses `rusqlite` (bundled). Multiple named connections supported; `"default"` is 
 ```
 
 Bind params: number, string, bool, nil. Returns `((col1 col2) (val1 val2) ...)` for queries.
+
+### HTML Parsing (scraper)
+
+CSS selector-based HTML parsing via `scraper` crate.
+
+```
+(html-select html css)          ; list of matching outer HTML strings
+(html-text html css)            ; list of text content strings
+(html-attr html css "attr")     ; list of attribute values (filtered)
+(html-links html)               ; list of (text url) pairs from <a href>
+(html-title html)               ; page title string or nil
+(html-meta html "name")         ; meta content by name or nil
+(html-meta-all html)            ; list of (name content) meta pairs
+(html-tables html)              ; nested list: tables > rows > cell text
+(html-images html)              ; list of (alt src) pairs from <img>
+(html-forms html)               ; nested list: (action method (input...))
+```
 
 ### Misc
 

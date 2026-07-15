@@ -1,6 +1,6 @@
 # alisp Documentation
 
-alisp is a tiny Lisp interpreter written in Rust with zero dependencies. It is designed specifically for AI agents — providing shell execution, file I/O, HTTP requests, JSON handling, and string manipulation in a minimal, easy-to-generate language.
+alisp is a tiny Lisp interpreter written in Rust. It is designed specifically for AI agents — providing shell execution, file I/O, HTTP requests, JSON handling, SQL databases, HTML parsing, and string manipulation in a minimal, easy-to-generate language.
 
 ---
 
@@ -26,6 +26,7 @@ alisp is a tiny Lisp interpreter written in Rust with zero dependencies. It is d
   - [HTTP](#http)
   - [JSON](#json)
   - [SQL](#sql-sqlite)
+  - [HTML Parsing](#html-parsing-scraper)
   - [Misc](#misc)
 - [Error Handling](#error-handling)
 - [Examples](#examples)
@@ -134,7 +135,7 @@ let compact = json_stringify(&data, true); // compact
 | `num(n)`, `int(n)`, `string(s)`, `sym(s)`, `list(v)`, `nil()`, `bool_val(b)` | Construct AST nodes |
 | `VERSION` | Version string constant |
 
-No external dependencies. Requires Rust toolchain to build.
+Requires Rust toolchain to build.
 
 ---
 
@@ -1512,6 +1513,140 @@ Close a database connection.
 (sql-execute "SELECT * FROM logs" "analytics")
 (sql-close "users")
 (sql-close "analytics")
+```
+
+---
+
+### HTML Parsing (scraper)
+
+alisp includes built-in HTML parsing via the `scraper` crate (CSS selector-based). Parse HTML strings, extract content, and scrape web pages without external tools.
+
+#### `html-select`
+
+Select elements by CSS selector. Returns a list of the outer HTML of each matching element.
+
+```lisp
+(def html "<div class='card'><h1>Title</h1><p>Body</p></div>")
+(html-select html "h1")          ; => ("<h1>Title</h1>")
+(html-select html ".card")       ; => ("<div class='card'><h1>Title</h1><p>Body</p></div>")
+(html-select html "p")           ; => ("<p>Body</p>")
+```
+
+#### `html-text`
+
+Extract text content from matching elements. Returns a list of text strings (concatenated from all descendant text nodes).
+
+```lisp
+(html-text html "h1")            ; => ("Title")
+(html-text html ".card")         ; => ("Title Body")
+(html-text html "p")             ; => ("Body")
+```
+
+#### `html-attr`
+
+Extract attribute values from matching elements. Only elements with the attribute are included.
+
+```lisp
+(def html "<a href='/about'>About</a><a href='/contact'>Contact</a>")
+(html-attr html "a" "href")      ; => ("/about" "/contact")
+(html-attr html "a" "href")      ; => ("/about" "/contact")
+```
+
+#### `html-links`
+
+Extract all links as `(text url)` pairs. Convenience wrapper for `<a href>` elements.
+
+```lisp
+(def html "<a href='/home'>Home</a><a href='/about'>About</a>")
+(html-links html)                ; => (("Home" "/home") ("About" "/about"))
+```
+
+#### `html-title`
+
+Get the page title. Returns the text of `<title>` or nil.
+
+```lisp
+(html-title "<html><head><title>My Page</title></head></html>")
+; => "My Page"
+(html-title "<html><body>No title</body></html>")
+; => nil
+```
+
+#### `html-meta`
+
+Get a specific meta tag's content by name or property.
+
+```lisp
+(def html "<meta name='description' content='A Lisp interpreter'>")
+(html-meta html "description")   ; => "A Lisp interpreter"
+
+; Works with OpenGraph tags too
+(def og "<meta property='og:title' content='My App'>")
+(html-meta og "og:title")        ; => "My App"
+```
+
+#### `html-meta-all`
+
+Get all meta tags as `(name-or-property content)` pairs.
+
+```lisp
+(def html "<meta name='author' content='Alice'><meta name='description' content='Hello'>")
+(html-meta-all html)
+; => (("author" "Alice") ("description" "Hello"))
+```
+
+#### `html-tables`
+
+Extract all tables as nested lists: `(table (row (cell...) ...) ...)`.
+
+```lisp
+(def html "<table><tr><th>Name</th><th>Age</th></tr><tr><td>Alice</td><td>30</td></tr></table>")
+(html-tables html)
+; => ((("Name" "Age") ("Alice" "30")))
+```
+
+#### `html-images`
+
+Extract all images as `(alt src)` pairs.
+
+```lisp
+(def html "<img src='logo.png' alt='Logo'><img src='photo.jpg'>")
+(html-images html)               ; => (("Logo" "logo.png") ("" "photo.jpg"))
+```
+
+#### `html-forms`
+
+Extract all forms with their inputs. Returns `(action method (input-name type value) ...)`.
+
+```lisp
+(def html "<form action='/login' method='POST'><input name='user' type='text'><input type='submit'></form>")
+(html-forms html)
+; => (("/login" "POST" ("user" "text" "") ("" "submit" "")))
+```
+
+#### HTML Examples
+
+```lisp
+; Scrape a webpage
+(def html (http-get "https://example.com"))
+(println "Title:" (html-title html))
+(println "Links:" (html-links html))
+(println "Images:" (html-images html))
+
+; Extract all text from articles
+(def articles (html-text (http-get "https://news.example.com") "article"))
+
+; Scrape a table
+(def rows (nth (html-tables (http-get "https://example.com/data")) 0))
+(dolist (row rows)
+  (println (join row " | ")))
+
+; Extract form fields for submission
+(let ((forms (html-forms html)))
+  (let ((action (nth (car forms) 0))
+        (method (nth (car forms) 1))
+        (fields (nth (car forms) 2)))
+    (println "Action:" action " Method:" method)))
 ```
 
 ---

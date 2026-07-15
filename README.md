@@ -1,8 +1,8 @@
 # alisp
 
-A tiny Lisp interpreter for AI agents. Zero dependencies.
+A tiny Lisp interpreter for AI agents.
 
-Built for one purpose: give AI a simple, powerful language to execute shell commands, manage files, call APIs, and automate tasks.
+Built for one purpose: give AI a simple, powerful language to execute shell commands, manage files, call APIs, parse HTML, query databases, and automate tasks.
 
 ## Quick Start
 
@@ -80,6 +80,7 @@ See the [full API docs](docs.md) for all available functions.
 | **HTTP** | GET, POST, PUT, DELETE via curl |
 | **JSON** | Parse, stringify, get/set values |
 | **SQL** | SQLite queries, execute, schema introspection (rusqlite bundled) |
+| **HTML** | CSS selector queries, text/attr extraction, links, tables, images, forms |
 | **Strings** | Split, join, replace, trim, format, case conversion |
 | **Regex** | Match, find, find-all, replace, split, scan with full regex support |
 | **Lists** | Map, filter, reduce, sort, reverse, zip |
